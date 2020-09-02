@@ -10,43 +10,11 @@ import (
 	"time"
 )
 
+
 func main() {
 	filePtr, _, countPtr := comFlag()
-	
-	randLine := genRandLine(countPtr)
-	fmt.Println(randLine)
+	countAndRead(filePtr, countPtr)
 
-	f, err := os.Open(*filePtr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		if err = f.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	var cc int
-	s := bufio.NewScanner(f)
-	for s.Scan() {
-		if (randLine[cc]) {
-			fmt.Println(s.Text())
-		}
-		cc++
-	}
-	err = s.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	
-	fmt.Println(cc)
-
-	/*data, err := ioutil.ReadFile(*filePtr)
-	if err != nil {
-		log.Fatal("File reading error ", err)
-	}
-	fmt.Println(string(data))*/
 }
 
 // Command-Line Flags
@@ -63,13 +31,13 @@ func comFlag() (*string, *int, *int) {
 }
 
 // Generate unique random numbers of lines to read from
-func genRandLine(count *int) map[int]bool {
+func genRandLine(countPtr *int, numLine int) map[int]bool {
 	randLine := map[int]bool{}
 
 	i := 0
-	for i != *count {
+	for i != *countPtr {
 		rand.Seed(time.Now().UnixNano())
-		randNum := rand.Intn(10) // 10 is number of lines in a file
+		randNum := rand.Intn(numLine) // 10 is number of lines in a file
 		if !randLine[randNum] {
 			randLine[randNum] = true
 			i++
@@ -77,5 +45,42 @@ func genRandLine(count *int) map[int]bool {
 	}
 
 	return randLine
+}
 
+// Count lines from a file and read random lines from a file
+func countAndRead (filePtr *string, countPtr *int) {
+	// Count lines from a file
+	f, err := os.Open(*filePtr)
+	var numLine int
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer func() {
+        if err = f.Close(); err != nil {
+        log.Fatal(err)
+    }
+	}()
+	
+	s := bufio.NewScanner(f)
+	for s.Scan() {
+		numLine++
+	}
+	err = s.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// After counting lines, select random lines from a file
+	randLine := genRandLine(countPtr, numLine)
+	fmt.Println(randLine)
+	f.Seek(0,0)
+	s = bufio.NewScanner(f)// Reset Scanner 
+	var line int
+	for s.Scan() {
+		if (randLine[line]) {
+			fmt.Println(s.Text())
+		}
+		line++
+	}
 }
