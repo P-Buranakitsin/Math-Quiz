@@ -35,9 +35,18 @@ func main() {
 				panic(err)
 			}
 
-			// string returned from reader.ReadString includes Carriage Return (ASCII 13) and Line Feed (ASCII 10)
+			// String returned from reader.ReadString includes Carriage Return (ASCII 13) and Line Feed (ASCII 10)
 			// Slicing is used to remove Carriage Return and Line Feed
-			if text[0:len(text)-2] == split[1] {
+
+			// **** When run in integrated VS code terminal, Carriage Return is included in the returned value from reader.ReadString whereas
+			// in normal terminal Carriage Return is not included
+
+			// Keep removing character from text variable until its length is equal to split[1] length
+			for len(text) != len(split[1]) {
+				text = text[:len(text)-1]
+			}
+
+			if text == split[1] {
 				correctAns++
 			}
 		}
@@ -46,16 +55,16 @@ func main() {
 	}()
 
 	// Select blocks until either case is satisfied
+	var timeUsed float64
 	select {
 	case <-c1:
-		fmt.Println("correct =", correctAns)
-		fmt.Println("time used =", duration.Seconds(), "seconds")
+		timeUsed = duration.Seconds()
 	case <-time.After(time.Duration(*timePtr) * time.Second):
-		fmt.Println()
-		fmt.Println("Time's up!!!!")
-		fmt.Println("correct =", correctAns)
-		fmt.Println("time used =", *timePtr, "seconds")
+		timeUsed = float64(*timePtr)
+		fmt.Println("\nTime's up!!!")
 	}
+	fmt.Println("\ncorrect =", correctAns)
+	fmt.Println("time used =", timeUsed, "seconds")
 }
 
 // Command-Line Flags
