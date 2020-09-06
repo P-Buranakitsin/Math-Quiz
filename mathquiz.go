@@ -121,7 +121,7 @@ func genRandLine(countPtr *int, numLine int) map[int]bool {
 	i := 0
 	for i != *countPtr {
 		rand.Seed(time.Now().UnixNano())
-		randNum := rand.Intn(numLine) // 10 is number of lines in a file
+		randNum := rand.Intn(numLine) // Generate integers between 0 to numLine
 		if !randLine[randNum] {
 			randLine[randNum] = true
 			i++
